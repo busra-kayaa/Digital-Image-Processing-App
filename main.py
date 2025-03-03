@@ -170,7 +170,7 @@ class Odev2Page(QWidget):
             file_path, file_type = QFileDialog.getSaveFileName(self, "Filtreli Görüntüyü Kaydet", "filtered_image.png",
                                                                "Görüntü Dosyaları (*.png *.jpg *.bmp *.jpeg);;PNG Dosyaları (*.png);;JPEG Dosyaları (*.jpg *.jpeg);;BMP Dosyaları (*.bmp)")
             if file_path:
-                if file_type == "PNG Dosyaları (*.png)":
+                if file_type == "PNG Dosyaları (*.png)" or file_type == "Görüntü Dosyaları (*.png)":
                     cv2.imwrite(file_path, self.image)
                     QMessageBox.information(self, "Bilgi", "Filtreli görüntü başarıyla PNG formatında kaydedildi.")
                 elif file_type == "JPEG Dosyaları (*.jpg *.jpeg)":
@@ -179,11 +179,13 @@ class Odev2Page(QWidget):
                 elif file_type == "BMP Dosyaları (*.bmp)":
                     cv2.imwrite(file_path, self.image)
                     QMessageBox.information(self, "Bilgi", "Filtreli görüntü başarıyla BMP formatında kaydedildi.")
+                else:
+                    cv2.imwrite(file_path, self.image)
+                    QMessageBox.information(self, "Bilgi", "Filtreli görüntü başarıyla PNG formatında kaydedildi.")
             else:
                 QMessageBox.warning(self, "Uyarı", "Dosya kaydedilmedi.")
         else:
             QMessageBox.warning(self, "Uyarı", "Lütfen önce bir filtre uygulayın.")
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
