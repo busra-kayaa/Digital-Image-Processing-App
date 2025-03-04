@@ -208,21 +208,25 @@ class Odev2Page(QWidget):
 
     def save_filtered_image(self):
         if self.image is not None:
-            file_path, file_type = QFileDialog.getSaveFileName(self, "Filtreli Görüntüyü Kaydet", "filtered_image.png",
-                                                               "Görüntü Dosyaları (*.png *.jpg *.bmp *.jpeg);;PNG Dosyaları (*.png);;JPEG Dosyaları (*.jpg *.jpeg);;BMP Dosyaları (*.bmp)")
+            file_path, _ = QFileDialog.getSaveFileName(
+                self, "Filtreli Görüntüyü Kaydet", "filtered_image.png",
+                "PNG Dosyaları (*.png);;JPEG Dosyaları (*.jpg *.jpeg);;BMP Dosyaları (*.bmp);;Tüm Dosyalar (*.*)"
+            )
+
             if file_path:
-                if file_type == "PNG Dosyaları (*.png)" or file_type == "Görüntü Dosyaları (*.png)":
-                    cv2.imwrite(file_path, self.image)
-                    QMessageBox.information(self, "Bilgi", "Filtreli görüntü başarıyla PNG formatında kaydedildi.")
-                elif file_type == "JPEG Dosyaları (*.jpg *.jpeg)":
-                    cv2.imwrite(file_path, self.image, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
-                    QMessageBox.information(self, "Bilgi", "Filtreli görüntü başarıyla JPEG formatında kaydedildi.")
-                elif file_type == "BMP Dosyaları (*.bmp)":
-                    cv2.imwrite(file_path, self.image)
-                    QMessageBox.information(self, "Bilgi", "Filtreli görüntü başarıyla BMP formatında kaydedildi.")
-                else:
-                    cv2.imwrite(file_path, self.image)
-                    QMessageBox.information(self, "Bilgi", "Filtreli görüntü başarıyla PNG formatında kaydedildi.")
+                file_extension = file_path.split('.')[-1].lower()
+
+                if file_extension not in ["png", "jpg", "jpeg", "bmp"]:
+                    file_path += ".png"
+                    file_extension = "png"
+
+                params = []
+                if file_extension in ["jpg", "jpeg"]:
+                    params = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+
+                cv2.imwrite(file_path, self.image, params)
+                QMessageBox.information(self, "Bilgi",
+                                        f"Filtreli görüntü başarıyla {file_extension.upper()} formatında kaydedildi.")
             else:
                 QMessageBox.warning(self, "Uyarı", "Dosya kaydedilmedi.")
         else:
