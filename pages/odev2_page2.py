@@ -1,22 +1,20 @@
-import cv2
 import numpy as np
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLabel, QPushButton,
                              QLineEdit, QFileDialog, QMessageBox, QScrollArea)
 from PyQt5.QtGui import QPixmap, QImage
-
+from PIL import Image  # Sadece RGB dönüşüm için
 
 class ZoomPage(QWidget):
     def __init__(self):
         super().__init__()
-        self.image = None
+        self.image = None  # RGB olarak tutulacak
         self.processed_image = None
         self.initUI()
 
     def initUI(self):
         layout = QVBoxLayout()
 
-        # Scroll alanı ve görsel etiketi
         self.scroll_area = QScrollArea()
         self.label = QLabel("Görsel Yüklenmedi")
         self.label.setAlignment(Qt.AlignCenter)
@@ -25,7 +23,6 @@ class ZoomPage(QWidget):
         self.scroll_area.setWidgetResizable(True)
         layout.addWidget(self.scroll_area)
 
-        # Zoom işlemi için giriş alanı
         self.zoom_input = QLineEdit()
         self.zoom_input.setPlaceholderText("Zoom faktörü (örn: 1.5 veya 0.5)")
         self.zoom_input.setStyleSheet("""
@@ -37,11 +34,9 @@ class ZoomPage(QWidget):
         """)
         layout.addWidget(self.zoom_input)
 
-        # Zoom butonları
         self.zoom_in_button = QPushButton(" Zoom In (Büyüt)")
         self.zoom_out_button = QPushButton(" Zoom Out (Küçült)")
 
-        # Buton stilleri
         self.zoom_in_button.setStyleSheet("""
             QPushButton {
                 background-color: #107bff;
@@ -50,10 +45,8 @@ class ZoomPage(QWidget):
                 padding: 10px;
                 border-radius: 10px;
                 min-width: 200px;
-                border: 2px;
             }
         """)
-
         self.zoom_out_button.setStyleSheet("""
             QPushButton {
                 background-color: #ff5722;
@@ -62,7 +55,6 @@ class ZoomPage(QWidget):
                 padding: 10px;
                 border-radius: 10px;
                 min-width: 200px;
-                border: 2px;
             }
         """)
 
@@ -72,7 +64,6 @@ class ZoomPage(QWidget):
         layout.addWidget(self.zoom_in_button)
         layout.addWidget(self.zoom_out_button)
 
-        # Görüntü yükleme butonu
         self.load_button = QPushButton(" Görüntü Yükle")
         self.load_button.setStyleSheet("""
             QPushButton {
@@ -81,7 +72,6 @@ class ZoomPage(QWidget):
                 font-size: 14pt;
                 padding: 10px;
                 border-radius: 8px;
-                border: 2px;
             }
         """)
         self.load_button.clicked.connect(self.load_image)
@@ -89,18 +79,14 @@ class ZoomPage(QWidget):
 
         self.setLayout(layout)
 
-    # ... (load_image, display_image, handle_zoom ve zoom_image fonksiyonları öncekiyle aynı)
-
     def load_image(self):
         path, _ = QFileDialog.getOpenFileName(self, "Görüntü Seç", "", "Resim Dosyaları (*.png *.jpg *.jpeg *.bmp)")
         if not path:
             return
 
-        self.image = cv2.imread(path)
-        if self.image is None:
-            QMessageBox.critical(self, "Hata", "Görüntü yüklenemedi!")
-            return
-
+        # PIL ile RGB formatında yüklenir
+        pil_img = Image.open(path).convert('RGB')
+        self.image = np.array(pil_img)
         self.processed_image = self.image.copy()
         self.display_image(self.image)
 
@@ -110,11 +96,10 @@ class ZoomPage(QWidget):
 
         h, w = img.shape[:2]
         bytes_per_line = 3 * w
-        qimg = QImage(img.data, w, h, bytes_per_line, QImage.Format_BGR888).rgbSwapped()
+        qimg = QImage(img.data, w, h, bytes_per_line, QImage.Format_RGB888)
         self.label.setPixmap(QPixmap.fromImage(qimg))
 
     def handle_zoom(self):
-        # Temel kontroller
         if self.image is None:
             QMessageBox.warning(self, "Uyarı", "Lütfen önce bir görüntü yükleyin!")
             return
@@ -132,7 +117,6 @@ class ZoomPage(QWidget):
             QMessageBox.warning(self, "Hata", "Geçersiz zoom değeri! Pozitif sayı girin.")
             return
 
-        # Hangi butona tıklandığını belirle
         sender = self.sender()
         try:
             if sender == self.zoom_in_button:
@@ -148,10 +132,21 @@ class ZoomPage(QWidget):
         if img is None:
             raise ValueError("Görüntü bulunamadı!")
 
-        h, w = img.shape[:2]
-        new_size = (int(w * factor), int(h * factor))
+        h, w, c = img.shape
+        new_h = int(h * factor)
+        new_w = int(w * factor)
 
-        if new_size[0] == 0 or new_size[1] == 0:
+        if new_w == 0 or new_h == 0:
             raise ValueError("Zoom değeri çok küçük!")
 
-        return cv2.resize(img, new_size, interpolation=cv2.INTER_LINEAR)
+        result = np.zeros((new_h, new_w, c), dtype=np.uint8)
+
+        for i in range(new_h):
+            for j in range(new_w):
+                old_y = int(i / factor)
+                old_x = int(j / factor)
+                old_y = min(old_y, h - 1)
+                old_x = min(old_x, w - 1)
+                result[i, j] = img[old_y, old_x]
+
+        return result
