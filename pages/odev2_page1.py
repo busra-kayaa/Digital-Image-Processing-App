@@ -110,23 +110,33 @@ class ResizePage(QWidget):
     def bilinear_resize(self, img_array, new_w, new_h):
         old_h, old_w = img_array.shape[:2]
         result = np.zeros((new_h, new_w, 3), dtype=np.uint8)
+
         for i in range(new_h):
             for j in range(new_w):
-                x = j * (old_w - 1) / (new_w - 1)
-                y = i * (old_h - 1) / (new_h - 1)
-                x0 = int(x)
+                # Orijinal görüntüdeki karşılık gelen (float) koordinat
+                x = (j + 0.5) * old_w / new_w - 0.5
+                y = (i + 0.5) * old_h / new_h - 0.5
+
+                x0 = int(np.floor(x))
                 x1 = min(x0 + 1, old_w - 1)
-                y0 = int(y)
+                y0 = int(np.floor(y))
                 y1 = min(y0 + 1, old_h - 1)
+
                 a = x - x0
                 b = y - y0
+
+                x0 = max(0, x0)
+                y0 = max(0, y0)
+
                 for c in range(3):
-                    result[i, j, c] = int(
-                        (1 - a) * (1 - b) * img_array[y0, x0, c] +
-                        a * (1 - b) * img_array[y0, x1, c] +
-                        (1 - a) * b * img_array[y1, x0, c] +
-                        a * b * img_array[y1, x1, c]
+                    value = (
+                            (1 - a) * (1 - b) * img_array[y0, x0, c] +
+                            a * (1 - b) * img_array[y0, x1, c] +
+                            (1 - a) * b * img_array[y1, x0, c] +
+                            a * b * img_array[y1, x1, c]
                     )
+                    result[i, j, c] = np.clip(value, 0, 255)
+
         return result
 
     def average_resize(self, img_array, new_w, new_h):
