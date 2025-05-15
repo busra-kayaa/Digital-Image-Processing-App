@@ -5,6 +5,7 @@ from pages.home_page import HomePage
 from pages.odev1_page1 import Odev1Page
 from pages.odev1_page2 import Odev1Page2
 from pages.odev2_page1 import ResizePage
+from pages.odev2_page2 import ZoomPage
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -36,6 +37,7 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(Odev1Page(), "Temel İşlevsellik")
         self.tab_widget.addTab(Odev1Page2(), "Filtre Uygulama")
         self.tab_widget.addTab(ResizePage(), "Boyut Değiştir (Büyüt/Küçült)")
+        self.tab_widget.addTab(ZoomPage(), "Yakınlaştır / Uzaklaştır ")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
