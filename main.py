@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget, QAction, QMes
 from pages.home_page import HomePage
 from pages.odev1_page1 import Odev1Page
 from pages.odev1_page2 import Odev1Page2
+from pages.odev2_page1 import ResizePage
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -34,6 +35,7 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(HomePage(), "Ana Sayfa")
         self.tab_widget.addTab(Odev1Page(), "Temel İşlevsellik")
         self.tab_widget.addTab(Odev1Page2(), "Filtre Uygulama")
+        self.tab_widget.addTab(ResizePage(), "Boyut Değiştir (Büyüt/Küçült)")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
