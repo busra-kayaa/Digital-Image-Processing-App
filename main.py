@@ -6,7 +6,12 @@ from pages.odev1_page1 import Odev1Page
 from pages.odev1_page2 import Odev1Page2
 from pages.odev2_page1 import ResizePage
 from pages.odev2_page2 import ZoomPage
-from  pages.odev2_page3 import RotateImage
+from pages.odev2_page3 import RotateImage
+from pages.final_1 import SCurvePage
+from pages.final_2 import HoughTransformPage
+from pages.final_3 import DeblurringPage
+from pages.final_4 import ObjectDetectionPage
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -39,6 +44,10 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(ResizePage(), "Boyut Değiştir (Büyüt/Küçült)")
         self.tab_widget.addTab(ZoomPage(), "Yakınlaştır / Uzaklaştır ")
         self.tab_widget.addTab(RotateImage(), "Döndürme")
+        self.tab_widget.addTab(SCurvePage(), "S-Curve")
+        self.tab_widget.addTab(HoughTransformPage(), "Hough Transform")
+        self.tab_widget.addTab(DeblurringPage(), "Deblurring (Bulanıklık Giderme)")
+        self.tab_widget.addTab(ObjectDetectionPage(), "Nesne Analizi ve Sayma")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
